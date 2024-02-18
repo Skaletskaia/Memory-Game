@@ -8,7 +8,7 @@ export function App() {
   const [attemptsLeft, setAttemptsLeft] = React.useState<number>(40);
   const [attemptsMade, setAttemptsMade] = React.useState<number>(0);
   const [game, setGame] = React.useState<number>(1);
-  const [score, setScore] = React.useState<number>(0);
+  const [score, setScore] = React.useState<number>(0); // когда будет 8 выиграл
 
   const [resultArrayImg, setResultArrayImg] = React.useState<string[]>([]);
 
@@ -39,49 +39,90 @@ export function App() {
   const onClickCard = (e: React.MouseEvent<HTMLElement>) => {
     const cardItem = (e.target as HTMLElement).closest(".cards__item");
 
-    // console.log(firstSelectCard, secondSelectCard);
+    // изменение кол-ва попыток
+    setAttemptsLeft((attemptsLeft) => attemptsLeft - 1);
+    setAttemptsMade((attemptsMade) => attemptsMade + 1);
+
+    // console.log(firstSelectCard, "test");
+    // console.log(secondSelectCard, "test");
+
+    // закрывать карточки после 2 открытых
+    if (firstSelectCard !== null && secondSelectCard !== null) {
+      clearTimeout(myTimeout);
+
+      closeCard(firstSelectCard);
+      closeCard(secondSelectCard);
+      setFirstSelectCard(null);
+      setSecondSelectCard(null);
+    }
 
     if (cardItem && firstSelectCard === null) {
       setFirstSelectCard(cardItem as HTMLElement);
+
+      console.log(firstSelectCard, "test");
+      console.log(secondSelectCard, "test");
     }
-    if (cardItem && firstSelectCard !== null) {
+    if (cardItem && firstSelectCard !== null && secondSelectCard === null) {
       setSecondSelectCard(cardItem as HTMLElement);
     }
   };
 
-  // изменение стилей
-  const changeCardStyle = (element: HTMLElement) => {};
-
-  // переворот карточки когда firstSelectCard обновляется
-  React.useEffect(() => {
-    // console.log(firstSelectCard);
-    // console.dir(firstSelectCard);
-
-    if (firstSelectCard) {
-      firstSelectCard.style.backgroundColor = "#E5E5E5";
+  // открыть карточку
+  const openCard = (element: HTMLElement) => {
+    if (element) {
+      element.style.backgroundColor = "#E5E5E5";
+      element.classList.add("cards__item--disabled");
     }
-
-    const imgLogo = firstSelectCard?.children[0];
-    const imgGame = firstSelectCard?.children[1];
+    const imgLogo = element?.children[0];
+    const imgGame = element?.children[1];
 
     imgLogo?.classList.add("cards__item-img--hidden");
     imgGame?.classList.remove("cards__item-img--hidden");
+  };
+
+  // закрыть карточку
+  const closeCard = (element: HTMLElement) => {
+    if (element) {
+      element.style.backgroundColor = "";
+      element.classList.remove("cards__item--disabled");
+    }
+
+    const imgLogo = element?.children[0];
+    const imgGame = element?.children[1];
+
+    imgLogo?.classList.remove("cards__item-img--hidden");
+    imgGame?.classList.add("cards__item-img--hidden");
+  };
+
+  // setTimeout на закрытие картинок
+
+  let myTimeout: ReturnType<typeof setTimeout>;
+
+  function startTimeout() {
+    myTimeout = setTimeout(() => {
+      if (firstSelectCard && secondSelectCard) {
+        closeCard(firstSelectCard);
+        closeCard(secondSelectCard);
+
+        setFirstSelectCard(null);
+        setSecondSelectCard(null);
+      }
+      console.log("time is off");
+    }, 1500);
+  }
+
+  // переворот карточки когда firstSelectCard обновляется
+  React.useEffect(() => {
+    if (firstSelectCard) {
+      openCard(firstSelectCard);
+    }
   }, [firstSelectCard]);
 
-  // переворот карточки когда firstSelectCard обновляется
+  // переворот карточки когда secondSelectCard обновляется
   React.useEffect(() => {
-    // console.log(firstSelectCard);
-    // console.dir(firstSelectCard);
-
     if (secondSelectCard) {
-      secondSelectCard.style.backgroundColor = "#E5E5E5";
+      openCard(secondSelectCard);
     }
-
-    const imgLogo = secondSelectCard?.children[0];
-    const imgGame = secondSelectCard?.children[1];
-
-    imgLogo?.classList.add("cards__item-img--hidden");
-    imgGame?.classList.remove("cards__item-img--hidden");
   }, [secondSelectCard]);
 
   // сравниваем 1 и 2 карточки
@@ -101,23 +142,18 @@ export function App() {
         secondSelectCard !== null &&
         firstImg === secondImg
       ) {
-        // setScore(+1);
+        setScore((score) => score + 1); // когда 8 конец игры
         firstSelectCard.style.visibility = "hidden";
         secondSelectCard.style.visibility = "hidden";
       }
       //карточки НЕ совпали
       else {
-        setTimeout(() => {
-          firstSelectCard;
-        }, 1500);
-
-        setFirstSelectCard(null);
-        setSecondSelectCard(null);
+        startTimeout();
       }
     }
   }, [secondSelectCard]);
 
-  // ! // делается перерендариг!!! должен быть всего 1 раз! или когда кнопка "сыграть еще"
+  // ! // делается перерендариг картинок!!! должен быть всего 1 раз! или когда кнопка "сыграть еще"
   React.useEffect(() => {
     setResultArrayImg(createArrayImg(arrayImg));
 
@@ -158,30 +194,3 @@ export function App() {
     </React.Fragment>
   );
 }
-
-// / const [arrayImages, setArrayImages] = React.useState(null); // тут будет 8 картинок, но ячеек 16
-
-// const idCardItem = (cardItem as HTMLElement).dataset.id;
-
-// if (idCardItem) {
-//   setFirstSelectCard(idCardItem);
-//   // console.log(cardItem);
-// }
-
-// //создание массива из картинок и его перемешивание
-// const createArrayImg = (arrayImg: string[]) => {
-//   let resoultArrayImg = arrayImg.concat(arrayImg);
-//   return resoultArrayImg.sort(() => Math.random() - 0.5);
-// };
-
-// const updCardImg = () => {
-//   console.log(firstSelectCard);
-
-//   console.dir(firstSelectCard);
-
-//   const imgLogo = firstSelectCard?.children[0];
-//   const imgGame = firstSelectCard?.children[1];
-
-//   imgLogo?.classList.add("cards__item-img--hidden");
-//   imgGame?.classList.remove("cards__item-img--hidden");
-// };

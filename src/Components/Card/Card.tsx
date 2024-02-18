@@ -28,13 +28,3 @@ export const Card: FC<Props> = ({ dataId, img, onClickCard }) => {
     </React.Fragment>
   );
 };
-
-// onClickCard: (id: string) => void;
-
-// onClick={() => onClickCard(dataId)}
-
-{
-  /* <div className="cards__item cards__item--hidden" data-Id={dataId}>
-        <img className="cards__item-img" src={`${img}`} alt="" />
-      </div> */
-}
