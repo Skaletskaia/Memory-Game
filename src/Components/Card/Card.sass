@@ -1,10 +1,13 @@
 @import "../../common.sass"
-      
+    
 .cards
       grid-column: 3 / 7
       display: grid
       grid-template-columns: repeat(4, 115px)
       gap: 14px
+      &--disabled
+        cursor: not-allowed
+        pointer-events: none
       &__item
           width: 115px
           height: 115px  

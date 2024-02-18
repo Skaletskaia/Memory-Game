@@ -39,13 +39,6 @@ export function App() {
   const onClickCard = (e: React.MouseEvent<HTMLElement>) => {
     const cardItem = (e.target as HTMLElement).closest(".cards__item");
 
-    // изменение кол-ва попыток
-    setAttemptsLeft((attemptsLeft) => attemptsLeft - 1);
-    setAttemptsMade((attemptsMade) => attemptsMade + 1);
-
-    // console.log(firstSelectCard, "test");
-    // console.log(secondSelectCard, "test");
-
     // закрывать карточки после 2 открытых
     if (firstSelectCard !== null && secondSelectCard !== null) {
       clearTimeout(myTimeout);
@@ -54,16 +47,21 @@ export function App() {
       closeCard(secondSelectCard);
       setFirstSelectCard(null);
       setSecondSelectCard(null);
+
+      if (cardItem) {
+        setFirstSelectCard(cardItem as HTMLElement);
+      }
     }
 
     if (cardItem && firstSelectCard === null) {
       setFirstSelectCard(cardItem as HTMLElement);
-
-      console.log(firstSelectCard, "test");
-      console.log(secondSelectCard, "test");
     }
     if (cardItem && firstSelectCard !== null && secondSelectCard === null) {
       setSecondSelectCard(cardItem as HTMLElement);
+
+      // изменение кол-ва попыток
+      setAttemptsLeft((attemptsLeft) => attemptsLeft - 1);
+      setAttemptsMade((attemptsMade) => attemptsMade + 1);
     }
   };
 
@@ -95,7 +93,6 @@ export function App() {
   };
 
   // setTimeout на закрытие картинок
-
   let myTimeout: ReturnType<typeof setTimeout>;
 
   function startTimeout() {
@@ -130,9 +127,7 @@ export function App() {
     const firstCard = firstSelectCard?.children[1] as HTMLImageElement;
     const secondCard = secondSelectCard?.children[1] as HTMLImageElement;
 
-    // console.log(firstCard);
-
-    if (firstCard) {
+    if (firstCard && secondCard) {
       const firstImg = firstCard.src;
       const secondImg = secondCard.src;
 
@@ -142,9 +137,27 @@ export function App() {
         secondSelectCard !== null &&
         firstImg === secondImg
       ) {
-        setScore((score) => score + 1); // когда 8 конец игры
-        firstSelectCard.style.visibility = "hidden";
-        secondSelectCard.style.visibility = "hidden";
+        const mainDiv = document.querySelector(".cards");
+
+        if (mainDiv) {
+          const htmlMainDiv = mainDiv as HTMLElement;
+          htmlMainDiv.classList.add("cards--disabled");
+        }
+
+        // небольшая пауза перед тем как скрыть картинки
+        setTimeout(() => {
+          setScore((score) => score + 1); // когда 8 конец игры
+          firstSelectCard.style.visibility = "hidden";
+          secondSelectCard.style.visibility = "hidden";
+
+          setFirstSelectCard(null);
+          setSecondSelectCard(null);
+
+          if (mainDiv) {
+            const htmlMainDiv = mainDiv as HTMLElement;
+            htmlMainDiv.classList.remove("cards--disabled");
+          }
+        }, 300);
       }
       //карточки НЕ совпали
       else {
