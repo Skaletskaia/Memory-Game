@@ -5,15 +5,14 @@ import "./Card.sass";
 import logo from "../../images/logo.svg";
 
 export interface Props {
-  dataId: string;
   img: string;
   onClickCard: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
-export const Card: FC<Props> = ({ dataId, img, onClickCard }) => {
+export const Card: FC<Props> = ({ img, onClickCard }) => {
   return (
     <React.Fragment>
-      <div className="cards__item " data-id={dataId} onClick={onClickCard}>
+      <div className="cards__item " onClick={onClickCard}>
         <img
           className="cards__item-img cards__item-img-logo "
           src={`${logo}`}

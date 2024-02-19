@@ -1,31 +1,31 @@
 import React from "react";
 import "./App.sass";
 import { Card } from "../Card/Card";
+import { LossModal } from "../LossModal/LossModal";
+import { WinModal } from "../WinModal/WinModal";
 
 import { arrayImg } from "../../images/images";
 
 export function App() {
   const [attemptsLeft, setAttemptsLeft] = React.useState<number>(40);
   const [attemptsMade, setAttemptsMade] = React.useState<number>(0);
-  const [game, setGame] = React.useState<number>(1);
   const [score, setScore] = React.useState<number>(0); // когда будет 8 выиграл
-
   const [resultArrayImg, setResultArrayImg] = React.useState<string[]>([]);
-
   const [firstSelectCard, setFirstSelectCard] =
     React.useState<HTMLElement | null>(null);
   const [secondSelectCard, setSecondSelectCard] =
     React.useState<HTMLElement | null>(null);
+  const [gameOff, setGameOff] = React.useState<boolean>(false);
 
-  const countCards = 16;
+  const mainDiv = document.querySelector(".cards");
 
   // создание массива карточек
   const createArrayDiv = (): string[] => {
+    const countCards = 16;
     let arrayCards: string[] = [];
-    for (let i: number = 1; i < countCards + 1; i++) {
+    for (let i: number = 0; i < countCards; i++) {
       arrayCards.push(i.toString());
     }
-
     return arrayCards;
   };
 
@@ -38,16 +38,20 @@ export function App() {
   // получение HTML элемента карточки по клику
   const onClickCard = (e: React.MouseEvent<HTMLElement>) => {
     const cardItem = (e.target as HTMLElement).closest(".cards__item");
-
+    clearTimeout(myTimeout);
+    console.log("я кликнул");
     // закрывать карточки после 2 открытых
     if (firstSelectCard !== null && secondSelectCard !== null) {
       clearTimeout(myTimeout);
+      console.log("я родился");
 
       closeCard(firstSelectCard);
       closeCard(secondSelectCard);
+
       setFirstSelectCard(null);
       setSecondSelectCard(null);
 
+      // зачем это, если после сброса они будут нул и пойдут вниз
       if (cardItem) {
         setFirstSelectCard(cardItem as HTMLElement);
       }
@@ -58,10 +62,6 @@ export function App() {
     }
     if (cardItem && firstSelectCard !== null && secondSelectCard === null) {
       setSecondSelectCard(cardItem as HTMLElement);
-
-      // изменение кол-ва попыток
-      setAttemptsLeft((attemptsLeft) => attemptsLeft - 1);
-      setAttemptsMade((attemptsMade) => attemptsMade + 1);
     }
   };
 
@@ -69,7 +69,7 @@ export function App() {
   const openCard = (element: HTMLElement) => {
     if (element) {
       element.style.backgroundColor = "#E5E5E5";
-      element.classList.add("cards__item--disabled");
+      element.classList.add("disabled");
     }
     const imgLogo = element?.children[0];
     const imgGame = element?.children[1];
@@ -82,7 +82,7 @@ export function App() {
   const closeCard = (element: HTMLElement) => {
     if (element) {
       element.style.backgroundColor = "";
-      element.classList.remove("cards__item--disabled");
+      element.classList.remove("disabled");
     }
 
     const imgLogo = element?.children[0];
@@ -101,17 +101,58 @@ export function App() {
         closeCard(firstSelectCard);
         closeCard(secondSelectCard);
 
-        setFirstSelectCard(null);
-        setSecondSelectCard(null);
+        // багааа или нет
+        // setFirstSelectCard(null);
+        // setSecondSelectCard(null);
       }
       console.log("time is off");
     }, 1500);
   }
 
+  // блокировка нажатия на карточки
+  const blockClickCards = () => {
+    if (mainDiv) {
+      const htmlMainDiv = mainDiv as HTMLElement;
+      htmlMainDiv.classList.add("disabled");
+    }
+  };
+
+  // разблокировка нажатия на карточки
+  const unlockClickCards = () => {
+    if (mainDiv) {
+      const htmlMainDiv = mainDiv as HTMLElement;
+      htmlMainDiv.classList.remove("disabled");
+    }
+  };
+
+  // изменение кол-ва попыток при сравнивании двух карточек
+  const changeAttempts = () => {
+    setAttemptsLeft((attemptsLeft) => attemptsLeft - 1);
+    setAttemptsMade((attemptsMade) => attemptsMade + 1);
+  };
+
+  // провека попыток
+  React.useEffect(() => {
+    if (attemptsMade === 40) {
+      blockClickCards();
+
+      // добавила задержку, чтобы было видно карточки
+      setTimeout(() => {
+        setGameOff(true);
+      }, 400);
+    }
+  }, [attemptsMade]);
+
+  // сброс игры
+  const restartGame = () => {
+    location.reload();
+  };
+
   // переворот карточки когда firstSelectCard обновляется
   React.useEffect(() => {
     if (firstSelectCard) {
       openCard(firstSelectCard);
+      console.log(firstSelectCard);
     }
   }, [firstSelectCard]);
 
@@ -119,6 +160,7 @@ export function App() {
   React.useEffect(() => {
     if (secondSelectCard) {
       openCard(secondSelectCard);
+      console.log(secondSelectCard);
     }
   }, [secondSelectCard]);
 
@@ -131,47 +173,53 @@ export function App() {
       const firstImg = firstCard.src;
       const secondImg = secondCard.src;
 
+      changeAttempts();
+
       //карточки совпали
       if (
         firstSelectCard !== null &&
         secondSelectCard !== null &&
         firstImg === secondImg
       ) {
-        const mainDiv = document.querySelector(".cards");
+        blockClickCards();
+        console.log("я угадал");
+        setFirstSelectCard(null);
+        setSecondSelectCard(null);
 
-        if (mainDiv) {
-          const htmlMainDiv = mainDiv as HTMLElement;
-          htmlMainDiv.classList.add("cards--disabled");
-        }
+        setScore((score) => score + 1); // когда 8 конец игры
 
         // небольшая пауза перед тем как скрыть картинки
         setTimeout(() => {
-          setScore((score) => score + 1); // когда 8 конец игры
           firstSelectCard.style.visibility = "hidden";
           secondSelectCard.style.visibility = "hidden";
 
-          setFirstSelectCard(null);
-          setSecondSelectCard(null);
+          // багааа
+          // setFirstSelectCard(null);
+          // setSecondSelectCard(null);
 
-          if (mainDiv) {
-            const htmlMainDiv = mainDiv as HTMLElement;
-            htmlMainDiv.classList.remove("cards--disabled");
+          // бага
+          if (score !== 8) {
+            unlockClickCards();
           }
         }, 300);
       }
       //карточки НЕ совпали
       else {
+        // таймаут стартует
+        console.log("я не угадал");
         startTimeout();
+        setFirstSelectCard(null);
+        setSecondSelectCard(null);
       }
     }
   }, [secondSelectCard]);
 
-  // ! // делается перерендариг картинок!!! должен быть всего 1 раз! или когда кнопка "сыграть еще"
+  //  перерендариг картинок!!
   React.useEffect(() => {
     setResultArrayImg(createArrayImg(arrayImg));
+  }, []);
 
-    console.log("tesssst");
-  }, [game]);
+  // console.log(score, "score");
 
   return (
     <React.Fragment>
@@ -189,7 +237,6 @@ export function App() {
                 return (
                   <Card
                     key={item}
-                    dataId={item}
                     img={resultArrayImg[index]}
                     onClickCard={onClickCard}
                   />
@@ -202,8 +249,23 @@ export function App() {
               <span className="main__text--attempts-left">{attemptsLeft}</span>
             </p>
           </div>
+          {/* открытие модального окна, если выиграл */}
+          {score === 8 ? (
+            <WinModal attemptsMade={attemptsMade} restartGame={restartGame} />
+          ) : null}
+
+          {gameOff ? <LossModal restartGame={restartGame} /> : null}
         </div>
       </main>
     </React.Fragment>
   );
 }
+
+// // проверка счета
+// React.useEffect(() => {
+//   if (score === 2) {
+//     blockClickCards();
+//   }
+// }, [score]);
+
+// 1/2/1/1 => удалится
