@@ -17,7 +17,8 @@ export function App() {
     React.useState<HTMLElement | null>(null);
   const [gameOff, setGameOff] = React.useState<boolean>(false);
 
-  let real_timeout_id: any;
+  // для таймаута
+  const [timer, setTimer] = React.useState<NodeJS.Timeout | null>(null);
 
   const mainDiv = document.querySelector(".cards");
 
@@ -30,9 +31,6 @@ export function App() {
     }
     return arrayCards;
   };
-
-  // setFirstSelectCard(null);
-  // setSecondSelectCard(null);
 
   //создание массива из картинок и его перемешивание
   const createArrayImg = (arrayImg: string[]) => {
@@ -59,7 +57,9 @@ export function App() {
       if (cardItem) {
         setFirstSelectCard(cardItem as HTMLElement);
         console.log("занес первую карточку которая третья");
-        stopTimeout(real_timeout_id);
+        if (timer) {
+          stopTimeout(timer);
+        }
       }
     }
 
@@ -105,7 +105,6 @@ export function App() {
   };
 
   // setTimeout на закрытие картинок
-
   function startTimeout(
     callback: () => void,
     duration: number
@@ -228,8 +227,8 @@ export function App() {
         // таймаут стартует
         console.log("я не угадал");
         console.log("таймер запускаю");
-        real_timeout_id = startTimeout(timeoutCallback, 1500);
-        console.log("таймаут айди = ", real_timeout_id);
+        setTimer(startTimeout(timeoutCallback, 1500));
+        console.log("таймаут айди = ", timer);
       }
     }
   }, [secondSelectCard]);
@@ -280,14 +279,3 @@ export function App() {
     </React.Fragment>
   );
 }
-
-// // проверка счета
-// React.useEffect(() => {
-//   if (score === 2) {
-//     blockClickCards();
-//   }
-// }, [score]);
-
-// 1/2/1/1 => удалится
-
-// : ReturnType<typeof setTimeout>
