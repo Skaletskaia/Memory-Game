@@ -17,6 +17,8 @@ export function App() {
     React.useState<HTMLElement | null>(null);
   const [gameOff, setGameOff] = React.useState<boolean>(false);
 
+  let real_timeout_id: any;
+
   const mainDiv = document.querySelector(".cards");
 
   // создание массива карточек
@@ -28,6 +30,9 @@ export function App() {
     }
     return arrayCards;
   };
+
+  // setFirstSelectCard(null);
+  // setSecondSelectCard(null);
 
   //создание массива из картинок и его перемешивание
   const createArrayImg = (arrayImg: string[]) => {
@@ -42,7 +47,6 @@ export function App() {
     console.log("я кликнул");
     // закрывать карточки после 2 открытых
     if (firstSelectCard !== null && secondSelectCard !== null) {
-      clearTimeout(myTimeout);
       console.log("я родился");
 
       closeCard(firstSelectCard);
@@ -54,13 +58,18 @@ export function App() {
       // зачем это, если после сброса они будут нул и пойдут вниз
       if (cardItem) {
         setFirstSelectCard(cardItem as HTMLElement);
+        console.log("занес первую карточку которая третья");
+        stopTimeout(real_timeout_id);
       }
     }
 
     if (cardItem && firstSelectCard === null) {
+      console.log("занес первую карточку");
       setFirstSelectCard(cardItem as HTMLElement);
     }
     if (cardItem && firstSelectCard !== null && secondSelectCard === null) {
+      console.log("занес вторую карточку");
+
       setSecondSelectCard(cardItem as HTMLElement);
     }
   };
@@ -90,23 +99,38 @@ export function App() {
 
     imgLogo?.classList.remove("cards__item-img--hidden");
     imgGame?.classList.add("cards__item-img--hidden");
+    console.log("закрываю карточки");
+    setFirstSelectCard(null);
+    setSecondSelectCard(null);
   };
 
   // setTimeout на закрытие картинок
-  let myTimeout: ReturnType<typeof setTimeout>;
 
-  function startTimeout() {
-    myTimeout = setTimeout(() => {
-      if (firstSelectCard && secondSelectCard) {
-        closeCard(firstSelectCard);
-        closeCard(secondSelectCard);
+  function startTimeout(
+    callback: () => void,
+    duration: number
+  ): ReturnType<typeof setTimeout> {
+    let timeoutId: ReturnType<typeof setTimeout>;
+    timeoutId = setTimeout(() => {
+      callback();
+      console.log("таймер закончился", timeoutId);
+    }, duration);
+    return timeoutId;
+  }
 
-        // багааа или нет
-        // setFirstSelectCard(null);
-        // setSecondSelectCard(null);
-      }
-      console.log("time is off");
-    }, 1500);
+  // Example usage:
+  function timeoutCallback(): void {
+    if (firstSelectCard && secondSelectCard) {
+      closeCard(firstSelectCard);
+      closeCard(secondSelectCard);
+    } else {
+      console.log("lol");
+    }
+  }
+
+  function stopTimeout(timeoutId: ReturnType<typeof setTimeout>) {
+    console.log("убираю таймер", timeoutId);
+    clearTimeout(timeoutId);
   }
 
   // блокировка нажатия на карточки
@@ -193,10 +217,6 @@ export function App() {
           firstSelectCard.style.visibility = "hidden";
           secondSelectCard.style.visibility = "hidden";
 
-          // багааа
-          // setFirstSelectCard(null);
-          // setSecondSelectCard(null);
-
           // бага
           if (score !== 8) {
             unlockClickCards();
@@ -207,9 +227,9 @@ export function App() {
       else {
         // таймаут стартует
         console.log("я не угадал");
-        startTimeout();
-        setFirstSelectCard(null);
-        setSecondSelectCard(null);
+        console.log("таймер запускаю");
+        real_timeout_id = startTimeout(timeoutCallback, 1500);
+        console.log("таймаут айди = ", real_timeout_id);
       }
     }
   }, [secondSelectCard]);
@@ -269,3 +289,5 @@ export function App() {
 // }, [score]);
 
 // 1/2/1/1 => удалится
+
+// : ReturnType<typeof setTimeout>
