@@ -38,7 +38,7 @@ export function App() {
   // получение HTML элемента карточки по клику
   const onClickCard = (e: React.MouseEvent<HTMLElement>) => {
     const cardItem = (e.target as HTMLElement).closest(".cards__item");
-    clearTimeout(myTimeout);
+
     console.log("я кликнул");
     // закрывать карточки после 2 открытых
     if (firstSelectCard !== null && secondSelectCard !== null) {
