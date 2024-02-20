@@ -42,21 +42,15 @@ export function App() {
   const onClickCard = (e: React.MouseEvent<HTMLElement>) => {
     const cardItem = (e.target as HTMLElement).closest(".cards__item");
 
-    console.log("я кликнул");
     // закрывать карточки после 2 открытых
     if (firstSelectCard !== null && secondSelectCard !== null) {
-      console.log("я родился");
-
       closeCard(firstSelectCard);
       closeCard(secondSelectCard);
-
-      setFirstSelectCard(null);
-      setSecondSelectCard(null);
 
       // зачем это, если после сброса они будут нул и пойдут вниз
       if (cardItem) {
         setFirstSelectCard(cardItem as HTMLElement);
-        console.log("занес первую карточку которая третья");
+        console.log("занесли первую карточку которая третья");
         if (timer) {
           stopTimeout(timer);
         }
@@ -64,11 +58,11 @@ export function App() {
     }
 
     if (cardItem && firstSelectCard === null) {
-      console.log("занес первую карточку");
+      console.log("занесли первую карточку");
       setFirstSelectCard(cardItem as HTMLElement);
     }
     if (cardItem && firstSelectCard !== null && secondSelectCard === null) {
-      console.log("занес вторую карточку");
+      console.log("занесли вторую карточку");
 
       setSecondSelectCard(cardItem as HTMLElement);
     }
@@ -100,6 +94,7 @@ export function App() {
     imgLogo?.classList.remove("cards__item-img--hidden");
     imgGame?.classList.add("cards__item-img--hidden");
     console.log("закрываю карточки");
+
     setFirstSelectCard(null);
     setSecondSelectCard(null);
   };
@@ -117,18 +112,16 @@ export function App() {
     return timeoutId;
   }
 
-  // Example usage:
+  // Example usage
   function timeoutCallback(): void {
     if (firstSelectCard && secondSelectCard) {
       closeCard(firstSelectCard);
       closeCard(secondSelectCard);
-    } else {
-      console.log("lol");
     }
   }
-
+  // стоп таймаут
   function stopTimeout(timeoutId: ReturnType<typeof setTimeout>) {
-    console.log("убираю таймер", timeoutId);
+    console.log("убираем таймер", timeoutId);
     clearTimeout(timeoutId);
   }
 
@@ -171,21 +164,17 @@ export function App() {
     location.reload();
   };
 
-  // переворот карточки когда firstSelectCard обновляется
+  // переворот карточки когда firstSelectCard или secondSelectCard обновляется
   React.useEffect(() => {
     if (firstSelectCard) {
       openCard(firstSelectCard);
       console.log(firstSelectCard);
     }
-  }, [firstSelectCard]);
-
-  // переворот карточки когда secondSelectCard обновляется
-  React.useEffect(() => {
     if (secondSelectCard) {
       openCard(secondSelectCard);
       console.log(secondSelectCard);
     }
-  }, [secondSelectCard]);
+  }, [firstSelectCard, secondSelectCard]);
 
   // сравниваем 1 и 2 карточки
   React.useEffect(() => {
@@ -205,7 +194,7 @@ export function App() {
         firstImg === secondImg
       ) {
         blockClickCards();
-        console.log("я угадал");
+        console.log("угадали");
         setFirstSelectCard(null);
         setSecondSelectCard(null);
 
@@ -225,8 +214,8 @@ export function App() {
       //карточки НЕ совпали
       else {
         // таймаут стартует
-        console.log("я не угадал");
-        console.log("таймер запускаю");
+        console.log("не угадали");
+        console.log("таймер запустился");
         setTimer(startTimeout(timeoutCallback, 1500));
         console.log("таймаут айди = ", timer);
       }
@@ -237,8 +226,6 @@ export function App() {
   React.useEffect(() => {
     setResultArrayImg(createArrayImg(arrayImg));
   }, []);
-
-  // console.log(score, "score");
 
   return (
     <React.Fragment>
@@ -268,7 +255,6 @@ export function App() {
               <span className="main__text--attempts-left">{attemptsLeft}</span>
             </p>
           </div>
-          {/* открытие модального окна, если выиграл */}
           {score === 8 ? (
             <WinModal attemptsMade={attemptsMade} restartGame={restartGame} />
           ) : null}
