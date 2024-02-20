@@ -13,4 +13,4 @@ pages:
   rules:
     - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
   tags:
-    - k8s-vk-karpov-lab-with-proixy
+    - k8s-vk-karpov-lab-with-proxy
