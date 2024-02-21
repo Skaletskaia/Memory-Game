@@ -17,7 +17,7 @@ export function App() {
     React.useState<HTMLElement | null>(null);
   const [gameOff, setGameOff] = React.useState<boolean>(false);
 
-  // для таймаута
+  // храним таймер тут
   const [timer, setTimer] = React.useState<NodeJS.Timeout | null>(null);
 
   const mainDiv = document.querySelector(".cards");
@@ -42,12 +42,12 @@ export function App() {
   const onClickCard = (e: React.MouseEvent<HTMLElement>) => {
     const cardItem = (e.target as HTMLElement).closest(".cards__item");
 
-    // закрывать карточки после 2 открытых
+    // третий клик - закрыть открытые каротчки
     if (firstSelectCard !== null && secondSelectCard !== null) {
       closeCard(firstSelectCard);
       closeCard(secondSelectCard);
 
-      // зачем это, если после сброса они будут нул и пойдут вниз
+      // записываем данные в firstSelectCard и останавливаем таймер (он должен был закрыть карточки, но они уже закрыты)
       if (cardItem) {
         setFirstSelectCard(cardItem as HTMLElement);
         console.log("занесли первую карточку которая третья");
@@ -57,10 +57,13 @@ export function App() {
       }
     }
 
+    // первый клик - firstSelectCard
     if (cardItem && firstSelectCard === null) {
       console.log("занесли первую карточку");
       setFirstSelectCard(cardItem as HTMLElement);
     }
+
+    // второй клик - secondSelectCard
     if (cardItem && firstSelectCard !== null && secondSelectCard === null) {
       console.log("занесли вторую карточку");
 
@@ -112,7 +115,7 @@ export function App() {
     return timeoutId;
   }
 
-  // Example usage
+  // функция для setTimeout
   function timeoutCallback(): void {
     if (firstSelectCard && secondSelectCard) {
       closeCard(firstSelectCard);
@@ -164,7 +167,7 @@ export function App() {
     location.reload();
   };
 
-  // переворот карточки когда firstSelectCard или secondSelectCard обновляется
+  // переворот карточки когда firstSelectCard или secondSelectCard обновляются
   React.useEffect(() => {
     if (firstSelectCard) {
       openCard(firstSelectCard);
@@ -205,7 +208,6 @@ export function App() {
           firstSelectCard.style.visibility = "hidden";
           secondSelectCard.style.visibility = "hidden";
 
-          // бага
           if (score !== 8) {
             unlockClickCards();
           }
@@ -213,7 +215,7 @@ export function App() {
       }
       //карточки НЕ совпали
       else {
-        // таймаут стартует
+        // таймаут стартует (2 карточки не совпали, то эти карточки закрываются (через 1500мс))
         console.log("не угадали");
         console.log("таймер запустился");
         setTimer(startTimeout(timeoutCallback, 1500));
